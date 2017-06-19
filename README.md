@@ -1,6 +1,8 @@
 # react-hydrate
 Asynchronous data fetching in React SSR environments.
 
+**Proof of concept:** working on a new personal site and boilerplate [over here](https://github.com/estrattonbailey/root/blob/master/server/router.js).
+
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](http://standardjs.com)
 
 ## Purpose
