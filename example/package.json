@@ -1,0 +1,55 @@
+{
+  "name": "",
+  "version": "",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parallelshell 'npm run js:watch' 'npm run css:watch'",
+    "js:build": "browserify index.js --debug -p [minifyify --map demo.js.map --output demo.js.map] > demo.js",
+    "js:watch": "watchify src/*.js index.js -v -d -o demo.js",
+    "css:build": "node-sass styles/main.css | postcss -u autoprefixer > styles.css",
+    "css:watch": "onchange 'styles/**/*.css' -- npm run css:build"
+  },
+  "browserify": {
+    "debug": true,
+    "cache": {},
+    "packageCache": {},
+    "extension": [
+      "js"
+    ],
+    "transform": [
+      "babelify"
+    ]
+  },
+  "browserify-shim": {},
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://"
+  },
+  "author": "estrattonbailey",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "devDependencies": {
+    "autoprefixer": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-react": "*",
+    "babelify": "*",
+    "browserify": "*",
+    "exorcist": "*",
+    "minifyify": "*",
+    "node-sass": "*",
+    "onchange": "*",
+    "parallelshell": "*",
+    "postcss-cli": "*",
+    "watchify": "*"
+  },
+  "dependencies": {
+    "micro-grid": "^0.1.3",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "svbstrate": "^3.2.4"
+  }
+}

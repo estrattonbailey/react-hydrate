@@ -1,0 +1,36 @@
+
+form {
+  margin: 0;
+}
+input,
+label,
+select,
+textarea {
+  outline: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: inherit;
+  position: relative;
+  background-color: transparent;
+}
+input[type="text"],
+textarea,
+select {
+  border: 2px solid black;
+  padding: .35em .65em;
+  -webkit-appearance: none;
+}
+select {
+}
+textarea {
+  max-width: 100%;
+  overflow: auto;
+  resize: vertical;
+}
+
+fieldset {
+  outline: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
