@@ -1,0 +1,39 @@
+@import 'lib/breakpoints';
+@import 'lib/colors';
+@import 'lib/display';
+@import 'lib/positioning';
+@import 'lib/flexbox';
+@import 'lib/align';
+@import 'lib/floats';
+@import 'lib/z-index';
+@import 'lib/typography';
+@import 'lib/buttons';
+@import 'lib/forms';
+@import 'lib/lists';
+@import 'lib/tables';
+@import 'lib/spacing';
+
+@import 'components/icon-buttons';
+@import 'components/internet';
+
+* {
+  box-sizing: border-box;
+}
+
+.outer {
+  padding: 1em;
+
+  @media (--m) {
+    padding: 2em;
+  }
+}
+
+.container {
+  max-width: 1300px;
+}
+
+.focus {
+  &:focus {
+    outline: 2px dashed var(--gray);
+  }
+}

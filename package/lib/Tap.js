@@ -1,29 +1,15 @@
 import React from 'react'
-import P from 'prop-types'
 import store from './store.js'
 
+const { setState } = store
+
 export default class Tap extends React.Component {
-  static childContextTypes = {
-    store: P.object
-  }
-
-  getChildContext () {
-    return {
-      store,
-    }
-  }
-
   constructor (props) {
     super(props)
 
-    store.state = {
-      ...store.state,
-      ...(this.props.initialState || {})
-    }
-  }
+    const { initialState = {} } = this.props
 
-  componentDidMount () {
-    store.state.loaded = false
+    setState(initialState)
   }
 
   render () {

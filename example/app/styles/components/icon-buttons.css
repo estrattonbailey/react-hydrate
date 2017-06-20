@@ -1,0 +1,11 @@
+.icon-buttons {
+
+}
+.icon-button {
+  width: 32px;
+  height: 32px;
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}

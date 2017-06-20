@@ -1,23 +1,21 @@
+let state = {}
+let loaders = {}
+
 export default {
-  state: {
-    loaded: false,
-    data: {}
-  },
-  loaders: [],
+  setState: obj => state = { ...state, ...obj },
+  getState: () => state,
+  addLoader: conf => loaders = { ...loaders, ...conf },
+  getLoaders: () => loaders,
   fetch () {
     return new Promise((resolve, reject) => {
-      Promise.all(this.loaders.map(([loader, props]) => loader(props))).then(data => {
-        this.state.data = data.reduce((res, datum) => {
-          return {
-            ...res,
-            ...datum
-          }
-        }, {})
-
-        this.state.loaded = true
-
-        resolve(data)
-      })
+      Promise.all(
+        Object.keys(loaders).map(key => {
+          const { loader, props } = loaders[key]
+          return Promise.resolve(loader(props)).then(data => {
+            state[key] = data
+          })
+        })
+      ).then(resolve).catch(reject)
     })
   }
 }
