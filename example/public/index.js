@@ -8697,9 +8697,9 @@ var _Tap = __webpack_require__(250);
 
 var _Tap2 = _interopRequireDefault(_Tap);
 
-var _store2 = __webpack_require__(69);
+var _store = __webpack_require__(69);
 
-var _store3 = _interopRequireDefault(_store2);
+var _store2 = _interopRequireDefault(_store);
 
 var _hydrate = __webpack_require__(251);
 
@@ -8707,16 +8707,9 @@ var _hydrate2 = _interopRequireDefault(_hydrate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var setState = _store3.default.setState,
-    getLoaders = _store3.default.getLoaders,
-    addLoader = _store3.default.addLoader,
-    store = _objectWithoutProperties(_store3.default, ['setState', 'getLoaders', 'addLoader']);
-
 exports.Tap = _Tap2.default;
 exports.hydrate = _hydrate2.default;
-exports.store = store;
+exports.store = _store2.default;
 
 /***/ }),
 /* 76 */
