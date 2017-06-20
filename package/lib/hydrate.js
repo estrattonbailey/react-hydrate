@@ -10,41 +10,47 @@ export default dataLoader => Comp => {
       this.state = {
         loading: true
       }
+
+      this.id = Comp.name
     }
 
     componentWillMount () {
       const {
         getState,
         setState,
-        getLoaders,
         addLoader
       } = store
 
       const state = getState()
-      const loaders = getLoaders()
+      const hydrate = state[this.id]
 
-      const id = Comp.name
-      const hydrate = state[id]
-
-      if (!loaders[id]) {
+      if (!hydrate) {
         addLoader({
-          [id]: {
+          [this.id]: {
             loader: dataLoader,
-            props: this.props,
-            loaded: false
+            props: this.props
           }
         })
       }
 
       if (hydrate) {
-        this.setState({
-          loading: false,
-          ...hydrate
-        })
+        hydrate.then ? (
+          hydrate.then(data => {
+            this.setState({
+              loading: false,
+              ...data
+            })
+          })
+        ) : (
+          this.setState({
+            loading: false,
+            ...hydrate
+          })
+        )
       } else {
         Promise.resolve(dataLoader(this.props)).then(data => {
           setState({
-            [id]: data
+            [this.id]: data
           })
 
           this.setState({
@@ -53,6 +59,17 @@ export default dataLoader => Comp => {
           })
         })
       }
+    }
+
+    componentWillReceiveProps (props) {
+      const { addLoader } = store
+
+      addLoader({
+        [this.id]: {
+          loader: dataLoader,
+          props: props
+        }
+      }).then(data => this.setState(data))
     }
 
     render () {

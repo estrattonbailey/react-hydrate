@@ -26,7 +26,6 @@ module.exports = (req, res) => {
     })
     res.end()
   } else {
-    console.log('fetch')
     store.fetch().then(data => {
       res.send(html(render(), store.getState(), getCSS()))
       res.end()

@@ -1,20 +1,21 @@
 let state = {}
-let loaders = {}
 
 export default {
   setState: obj => state = { ...state, ...obj },
   getState: () => state,
-  addLoader: conf => loaders = { ...loaders, ...conf },
-  getLoaders: () => loaders,
+  addLoader: conf => {
+    const key = Object.keys(conf)[0]
+    const loader = conf[key].loader
+    const props = conf[key].props
+
+    state[key] = Promise.resolve(loader(props))
+
+    return state[key]
+  },
   fetch () {
     return new Promise((resolve, reject) => {
       Promise.all(
-        Object.keys(loaders).map(key => {
-          const { loader, props } = loaders[key]
-          return Promise.resolve(loader(props)).then(data => {
-            state[key] = data
-          })
-        })
+        Object.keys(state).map(key => state[key])
       ).then(resolve).catch(reject)
     })
   }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Outer, Container } from 'Components/Layout'
 import { hydrate } from 'react-hydrate'
+import AsyncText from 'Components/AsyncText'
 
 class Home extends React.Component {
   render () {
@@ -24,10 +25,31 @@ const HomeWithData = hydrate(
   })
 )(Home)
 
-export default props => (
-  <Outer>
-    <Container>
-      <HomeWithData />
-    </Container>
-  </Outer>
-)
+export default class extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      bool: true
+    }
+  }
+
+  componentDidMount () {
+    // setTimeout(() => {
+    //   this.setState({
+    //     bool: false
+    //   })
+    // }, 100)
+  }
+
+  render () {
+    return (
+      <Outer>
+        <Container>
+          <HomeWithData />
+          <AsyncText someProp={this.state.bool} />
+        </Container>
+      </Outer>
+    )
+  }
+}

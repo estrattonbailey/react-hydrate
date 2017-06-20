@@ -8038,7 +8038,6 @@ Object.defineProperty(exports, "__esModule", {
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var state = {};
-var loaders = {};
 
 exports.default = {
   setState: function setState(obj) {
@@ -8048,21 +8047,18 @@ exports.default = {
     return state;
   },
   addLoader: function addLoader(conf) {
-    return loaders = _extends({}, loaders, conf);
-  },
-  getLoaders: function getLoaders() {
-    return loaders;
+    var key = Object.keys(conf)[0];
+    var loader = conf[key].loader;
+    var props = conf[key].props;
+
+    state[key] = Promise.resolve(loader(props));
+
+    return state[key];
   },
   fetch: function fetch() {
     return new Promise(function (resolve, reject) {
-      Promise.all(Object.keys(loaders).map(function (key) {
-        var _loaders$key = loaders[key],
-            loader = _loaders$key.loader,
-            props = _loaders$key.props;
-
-        return Promise.resolve(loader(props)).then(function (data) {
-          state[key] = data;
-        });
+      Promise.all(Object.keys(state).map(function (key) {
+        return state[key];
       })).then(resolve).catch(reject);
     });
   }
@@ -13802,13 +13798,69 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = __webpack_require__(6);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _Layout = __webpack_require__(76);
 
+var _reactHydrate = __webpack_require__(75);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var About = function (_React$Component) {
+  _inherits(About, _React$Component);
+
+  function About() {
+    _classCallCheck(this, About);
+
+    return _possibleConstructorReturn(this, (About.__proto__ || Object.getPrototypeOf(About)).apply(this, arguments));
+  }
+
+  _createClass(About, [{
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          loading = _props.loading,
+          description = _props.description;
+
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'h1',
+          null,
+          'About'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          loading ? 'Loading description...' : description
+        )
+      );
+    }
+  }]);
+
+  return About;
+}(_react2.default.Component);
+
+var AboutWithData = (0, _reactHydrate.hydrate)(function (props) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      resolve({
+        description: 'This is the about page. This data was loaded asynchronously.'
+      });
+    }, 1000);
+  });
+})(About);
 
 exports.default = function (props) {
   return _react2.default.createElement(
@@ -13817,11 +13869,7 @@ exports.default = function (props) {
     _react2.default.createElement(
       _Layout.Container,
       null,
-      _react2.default.createElement(
-        'h1',
-        null,
-        'About'
-      )
+      _react2.default.createElement(AboutWithData, null)
     )
   );
 };
@@ -13846,6 +13894,10 @@ var _react2 = _interopRequireDefault(_react);
 var _Layout = __webpack_require__(76);
 
 var _reactHydrate = __webpack_require__(75);
+
+var _AsyncText = __webpack_require__(269);
+
+var _AsyncText2 = _interopRequireDefault(_AsyncText);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13901,17 +13953,49 @@ var HomeWithData = (0, _reactHydrate.hydrate)(function (props) {
   });
 })(Home);
 
-exports.default = function (props) {
-  return _react2.default.createElement(
-    _Layout.Outer,
-    null,
-    _react2.default.createElement(
-      _Layout.Container,
-      null,
-      _react2.default.createElement(HomeWithData, null)
-    )
-  );
-};
+var _class = function (_React$Component2) {
+  _inherits(_class, _React$Component2);
+
+  function _class(props) {
+    _classCallCheck(this, _class);
+
+    var _this2 = _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, props));
+
+    _this2.state = {
+      bool: true
+    };
+    return _this2;
+  }
+
+  _createClass(_class, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      // setTimeout(() => {
+      //   this.setState({
+      //     bool: false
+      //   })
+      // }, 100)
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        _Layout.Outer,
+        null,
+        _react2.default.createElement(
+          _Layout.Container,
+          null,
+          _react2.default.createElement(HomeWithData, null),
+          _react2.default.createElement(_AsyncText2.default, { someProp: this.state.bool })
+        )
+      );
+    }
+  }]);
+
+  return _class;
+}(_react2.default.Component);
+
+exports.default = _class;
 
 /***/ }),
 /* 124 */
@@ -28439,6 +28523,8 @@ exports.default = function (dataLoader) {
         _this.state = {
           loading: true
         };
+
+        _this.id = Comp.name;
         return _this;
       }
 
@@ -28449,37 +28535,51 @@ exports.default = function (dataLoader) {
 
           var getState = _store2.default.getState,
               setState = _store2.default.setState,
-              getLoaders = _store2.default.getLoaders,
               addLoader = _store2.default.addLoader;
 
 
           var state = getState();
-          var loaders = getLoaders();
+          var hydrate = state[this.id];
 
-          var id = Comp.name;
-          var hydrate = state[id];
-
-          if (!loaders[id]) {
-            addLoader(_defineProperty({}, id, {
+          if (!hydrate) {
+            addLoader(_defineProperty({}, this.id, {
               loader: dataLoader,
-              props: this.props,
-              loaded: false
+              props: this.props
             }));
           }
 
           if (hydrate) {
-            this.setState(_extends({
+            hydrate.then ? hydrate.then(function (data) {
+              _this2.setState(_extends({
+                loading: false
+              }, data));
+            }) : this.setState(_extends({
               loading: false
             }, hydrate));
           } else {
             Promise.resolve(dataLoader(this.props)).then(function (data) {
-              setState(_defineProperty({}, id, data));
+              setState(_defineProperty({}, _this2.id, data));
 
               _this2.setState(_extends({
                 loading: false
               }, data));
             });
           }
+        }
+      }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(props) {
+          var _this3 = this;
+
+          var addLoader = _store2.default.addLoader;
+
+
+          addLoader(_defineProperty({}, this.id, {
+            loader: dataLoader,
+            props: props
+          })).then(function (data) {
+            return _this3.setState(data);
+          });
         }
       }, {
         key: 'render',
@@ -30516,6 +30616,76 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 269 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Layout = __webpack_require__(76);
+
+var _reactHydrate = __webpack_require__(75);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AsyncText = function (_React$Component) {
+  _inherits(AsyncText, _React$Component);
+
+  function AsyncText() {
+    _classCallCheck(this, AsyncText);
+
+    return _possibleConstructorReturn(this, (AsyncText.__proto__ || Object.getPrototypeOf(AsyncText)).apply(this, arguments));
+  }
+
+  _createClass(AsyncText, [{
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          loading = _props.loading,
+          description = _props.description;
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'mt2' },
+        _react2.default.createElement(
+          'p',
+          null,
+          loading ? 'Loading text...' : description
+        )
+      );
+    }
+  }]);
+
+  return AsyncText;
+}(_react2.default.Component);
+
+exports.default = (0, _reactHydrate.hydrate)(function (props) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      resolve({
+        description: props.someProp ? 'You probably haven\'t heard of them jianbing fingerstache, hot chicken flannel palo santo cred chartreuse bicycle rights.' : 'Hot chicken beard godard shoreditch. Tilde typewriter godard shabby chic kombucha, chicharrones lomo pabst post-ironic adaptogen man braid +1 snackwave vegan.'
+      });
+    }, 1000);
+  });
+})(AsyncText);
 
 /***/ })
 /******/ ]);
