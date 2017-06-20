@@ -3,6 +3,7 @@ let state = {}
 export default {
   setState: obj => state = { ...state, ...obj },
   getState: () => state,
+  clearState: () => state = {},
   addLoader: conf => {
     const key = Object.keys(conf)[0]
     const loader = conf[key].loader
@@ -14,9 +15,11 @@ export default {
   },
   fetch () {
     return new Promise((resolve, reject) => {
-      Promise.all(
-        Object.keys(state).map(key => state[key])
-      ).then(resolve).catch(reject)
+      setTimeout(() => {
+        Promise.all(
+          Object.keys(state).map(key => state[key])
+        ).then(resolve).catch(reject)
+      }, 0)
     })
   }
 }
