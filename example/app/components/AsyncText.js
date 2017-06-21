@@ -15,6 +15,7 @@ class AsyncText extends React.Component {
 
 export default hydrate(
   props => new Promise(( resolve, reject ) => {
+    console.log('AsyncText loader')
     setTimeout(() => {
       resolve({
         description: props.someProp ? (

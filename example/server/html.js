@@ -32,7 +32,7 @@ module.exports = (content, state, css) =>
   <body>
     <div id="root">${content}</div>
     <script>
-      window.__state = ${JSON.stringify(state)}
+      window.__state = ${state}
     </script>
     <script src="/index.js"></script>
   </body>

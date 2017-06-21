@@ -17,6 +17,7 @@ class Home extends React.Component {
 
 const HomeWithData = hydrate(
   props => new Promise(( resolve, reject ) => {
+    console.log('Home loader')
     setTimeout(() => {
       resolve({
         description: 'This is the home page. This data was loaded asynchronously.'

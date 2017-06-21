@@ -1,7 +1,7 @@
 import React from 'react'
 import store from './store.js'
 
-const { setState } = store
+const { setState, setHash } = store
 
 export default class Tap extends React.Component {
   constructor (props) {
@@ -10,6 +10,7 @@ export default class Tap extends React.Component {
     const { initialState = {} } = this.props
 
     setState(initialState)
+    setHash(initialState)
   }
 
   render () {

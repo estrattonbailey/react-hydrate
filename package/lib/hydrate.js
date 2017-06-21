@@ -18,13 +18,16 @@ export default dataLoader => Comp => {
       const {
         getState,
         setState,
-        addLoader
+        addLoader,
+        getHash
       } = store
 
-      const state = getState()
-      const hydrate = state[this.id]
-
-      if (!hydrate) {
+      /**
+       * Synchronous. Check if
+       * the loader exists on the
+       * store. If not, add it.
+       */
+      if (!getHash()[this.id]) {
         addLoader({
           [this.id]: {
             loader: dataLoader,
@@ -33,32 +36,25 @@ export default dataLoader => Comp => {
         })
       }
 
-      if (hydrate) {
-        hydrate.then ? (
-          hydrate.then(data => {
+      getState().then(state => {
+        if (state[this.id]) {
+          this.setState({
+            loading: false,
+            ...state[this.id]
+          })
+        } else {
+          Promise.resolve(dataLoader(this.props)).then(data => {
+            setState({
+              [this.id]: data
+            })
+
             this.setState({
               loading: false,
               ...data
             })
           })
-        ) : (
-          this.setState({
-            loading: false,
-            ...hydrate
-          })
-        )
-      } else {
-        Promise.resolve(dataLoader(this.props)).then(data => {
-          setState({
-            [this.id]: data
-          })
-
-          this.setState({
-            loading: false,
-            ...data
-          })
-        })
-      }
+        }
+      })
     }
 
     componentWillReceiveProps (props) {
