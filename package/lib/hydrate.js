@@ -1,9 +1,19 @@
 import React from 'react'
-import P from 'prop-types'
-import store from './store.js'
+import PropTypes from 'prop-types'
 
 export default dataLoader => Comp => {
   return class ComponentProvider extends React.Component {
+    static contextTypes = {
+      hydrate: PropTypes.shape({
+        store: PropTypes.shape({
+          getState: PropTypes.func.isRequired,
+          setState: PropTypes.func.isRequired,
+          addLoader: PropTypes.func.isRequired,
+          getHash: PropTypes.func.isRequired
+        }).isRequired
+      }).isRequired
+    }
+
     constructor (props, context) {
       super(props, context)
 
@@ -12,6 +22,7 @@ export default dataLoader => Comp => {
       }
 
       this.id = Comp.name
+      this.store = this.context.hydrate.store
     }
 
     componentWillMount () {
@@ -20,7 +31,7 @@ export default dataLoader => Comp => {
         setState,
         addLoader,
         getHash
-      } = store
+      } = this.store
 
       /**
        * Synchronous. Check if
@@ -58,7 +69,7 @@ export default dataLoader => Comp => {
     }
 
     componentWillReceiveProps (props) {
-      const { addLoader } = store
+      const { addLoader } = this.store
 
       addLoader({
         [this.id]: {
