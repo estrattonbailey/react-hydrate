@@ -9,8 +9,7 @@ export default class Tap extends React.Component {
         getState: PropTypes.func.isRequired,
         setState: PropTypes.func.isRequired,
         clearState: PropTypes.func.isRequired,
-        addLoader: PropTypes.func.isRequired,
-        getHash: PropTypes.func.isRequired
+        addLoader: PropTypes.func.isRequired
       }).isRequired,
       root: PropTypes.object.isRequired,
       hydrateStore: PropTypes.func.isRequired
@@ -34,7 +33,7 @@ export default class Tap extends React.Component {
       hydrate = {}
     } = this.props
 
-    this.store = hydrate.getState ? hydrate : createStore(hydrate)
+    this.hydrateStore(hydrate)
   }
 
   hydrateStore (hydrate) {

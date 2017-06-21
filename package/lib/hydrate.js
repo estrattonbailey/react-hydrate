@@ -8,8 +8,7 @@ export default dataLoader => Comp => {
         store: PropTypes.shape({
           getState: PropTypes.func.isRequired,
           setState: PropTypes.func.isRequired,
-          addLoader: PropTypes.func.isRequired,
-          getHash: PropTypes.func.isRequired
+          addLoader: PropTypes.func.isRequired
         }).isRequired
       }).isRequired
     }
@@ -17,66 +16,58 @@ export default dataLoader => Comp => {
     constructor (props, context) {
       super(props, context)
 
-      this.state = {
-        loading: true
-      }
-
       this.id = Comp.name
-      this.store = this.context.hydrate.store
+
+      const state = this.context.hydrate.store.getState()
+
+      this.state = state[this.id] ? {
+        loading: false,
+        ...state[this.id]
+      } : { loading: true }
+
+      !state[this.id] && this.load()
     }
 
-    componentWillMount () {
+    load (newProps = null) {
       const {
-        getState,
         setState,
-        addLoader,
-        getHash
-      } = this.store
+        getState,
+        addLoader
+      } = this.context.hydrate.store
 
-      /**
-       * Synchronous. Check if
-       * the loader exists on the
-       * store. If not, add it.
-       */
-      if (!getHash()[this.id]) {
+      const state = getState()
+
+      if (!state[this.id] || newProps) {
         addLoader({
           [this.id]: {
             loader: dataLoader,
-            props: this.props
+            props: newProps || this.props
           }
+        }).then(state => {
+          setState({
+            [this.id]: state
+          })
+
+          return state
+        }).then(state => {
+          this.cache = state
+
+          return state
         })
       }
+    }
 
-      getState().then(state => {
-        if (state[this.id]) {
-          this.setState({
-            loading: false,
-            ...state[this.id]
-          })
-        } else {
-          Promise.resolve(dataLoader(this.props)).then(data => {
-            setState({
-              [this.id]: data
-            })
-
-            this.setState({
-              loading: false,
-              ...data
-            })
-          })
-        }
-      })
+    componentWillMount () {
+      if (this.cache) {
+        this.setState({
+          loading: false,
+          ...this.cache
+        })
+      }
     }
 
     componentWillReceiveProps (props) {
-      const { addLoader } = this.store
-
-      addLoader({
-        [this.id]: {
-          loader: dataLoader,
-          props: props
-        }
-      }).then(data => this.setState(data))
+      this.load(props).then(state => this.setState(state))
     }
 
     render () {
