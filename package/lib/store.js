@@ -1,29 +1,43 @@
+import merge from 'deepmerge'
+
 export default hydrate => {
+  let loaders = []
   let state = {}
 
   const methods = {
-    setState (obj) { 
+    setState (obj) {
       state = { ...state, ...obj }
     },
-    getState () { 
+    getState () {
       return state
     },
-    clearState () { 
+    clearState () {
       state = {}
+      loaders = []
     },
-    addLoader (conf) { 
-      const key = Object.keys(conf)[0]
-      const loader = conf[key].loader
-      const props = conf[key].props
+    addLoader (config, reload) {
+      let resolve
+      let [ loader, props ] = config
 
-      state[key] = Promise.resolve(loader(props))
+      const exists = loaders.filter(L => L[0] === config[0])[0]
 
-      return state[key]
+      if (exists && !reload) {
+        [ loader, props, resolve ] = exists
+      } else {
+        resolve = Promise.resolve(loader(props, state)).then(data => {
+          state = merge(state, data)
+          return state
+        })
+
+        loaders.push([ loader, props, resolve ])
+      }
+
+      return resolve
     },
     fetch () {
       return Promise.all(
-        Object.keys(state).map(key => state[key])
-      ).catch(err => console.error(err))
+        loaders.map(([ ,, resolve ]) => resolve)
+      ).then(() => state).catch(err => console.error(err))
     }
   }
 

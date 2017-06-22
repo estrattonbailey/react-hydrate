@@ -1,7 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import eq from '@f/equal-obj'
 
-export default dataLoader => Comp => {
+export default (
+  dataLoader,
+  mapStateToProps = s => s
+) => Comp => {
   return class ComponentProvider extends React.Component {
     static contextTypes = {
       hydrate: PropTypes.shape({
@@ -13,61 +17,49 @@ export default dataLoader => Comp => {
       }).isRequired
     }
 
+    load (props) {
+      const { addLoader } = this.context.hydrate.store
+
+      return addLoader(
+        [ dataLoader, props ],
+        !eq(this.props, props)
+      )
+    }
+
     constructor (props, context) {
       super(props, context)
 
-      this.id = Comp.name
+      let state = {}
 
-      const state = this.context.hydrate.store.getState()
+      try {
+        state = {
+          loading: false,
+          ...mapStateToProps(this.context.hydrate.store.getState())
+        }
+      } catch (e) {}
 
-      this.state = state[this.id] ? {
-        loading: false,
-        ...state[this.id]
-      } : { loading: true }
-
-      !state[this.id] && this.load()
-    }
-
-    load (newProps = null) {
-      const {
-        setState,
-        getState,
-        addLoader
-      } = this.context.hydrate.store
-
-      const state = getState()
-
-      if (!state[this.id] || newProps) {
-        addLoader({
-          [this.id]: {
-            loader: dataLoader,
-            props: newProps || this.props
-          }
-        }).then(state => {
-          setState({
-            [this.id]: state
-          })
-
-          return state
-        }).then(state => {
-          this.cache = state
-
-          return state
-        })
+      this.state = {
+        loading: true,
+        ...state
       }
+
+      this.load(props || {}).then(state => {
+        this.cache = mapStateToProps(state)
+      })
     }
 
     componentWillMount () {
-      if (this.cache) {
-        this.setState({
-          loading: false,
-          ...this.cache
-        })
-      }
+      this.cache && this.setState({
+        loading: false,
+        ...this.cache
+      })
     }
 
     componentWillReceiveProps (props) {
-      this.load(props).then(state => this.setState(state))
+      this.load(props).then(state => this.setState({
+        loading: false,
+        ...mapStateToProps(state)
+      }))
     }
 
     render () {
