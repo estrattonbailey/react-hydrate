@@ -22,6 +22,10 @@ import { hydrate } from 'react-hydrate'
 import Project from './Project.js'
 
 export default hydrate(
+  /**
+   * dataLoader receives component props
+   * and any state already in the store
+   */
   (props, state) => {
     return api.fetchProjects().then(projects => {
       return {
@@ -29,16 +33,26 @@ export default hydrate(
       }
     })
   },
+  /**
+   * mapStateToProps receives the
+   * loaded data via `state` and any
+   * component props
+   */
   (state, props) => {
     return {
       data: state.projects
     }
   }
 )(props => {
+  /**
+   * Component is always passed a loading
+   * prop that represents the status of their
+   * dataLoader function
+   */
   return props.loading ? (
     <div>Loading data...</div>
   ) : (
-    props.projects.map(project => <Project {...project} key={project.slug}>)
+    props.data.map(project => <Project {...project} key={project.slug}>)
   )
 })
 ```
