@@ -13152,54 +13152,73 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+var _deepmerge = __webpack_require__(260);
+
+var _deepmerge2 = _interopRequireDefault(_deepmerge);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 exports.default = function (hydrate) {
-  var hash = {};
+  var loaders = [];
   var state = {};
 
   var methods = {
-    getHash: function getHash() {
-      return hash;
-    },
-    setHash: function setHash(obj) {
-      Object.keys(obj).forEach(function (key) {
-        return hash[key] = true;
-      });
-    },
     setState: function setState(obj) {
       state = _extends({}, state, obj);
     },
     getState: function getState() {
-      return Promise.all(Object.keys(state).map(function (key) {
-        return state[key];
-      })).then(function (data) {
-        return data.reduce(function (res, dat, i) {
-          res[Object.keys(state)[i]] = dat;
-          return res;
-        }, {});
-      }).catch(function (err) {
-        return console.error(err);
-      });
+      return state;
     },
     clearState: function clearState() {
       state = {};
-      hash = {};
+      loaders = [];
     },
-    addLoader: function addLoader(conf) {
-      var key = Object.keys(conf)[0];
-      var loader = conf[key].loader;
-      var props = conf[key].props;
+    addLoader: function addLoader(config, reload) {
+      var resolve = void 0;
 
-      state[key] = Promise.resolve(loader(props));
+      var _config = _slicedToArray(config, 2),
+          loader = _config[0],
+          props = _config[1];
 
-      hash[key] = true;
+      var exists = loaders.filter(function (L) {
+        return L[0] === config[0];
+      })[0];
 
-      return state[key];
+      if (exists && !reload) {
+        var _exists = _slicedToArray(exists, 3);
+
+        loader = _exists[0];
+        props = _exists[1];
+        resolve = _exists[2];
+      } else {
+        resolve = Promise.resolve(loader(props, state)).then(function (data) {
+          state = (0, _deepmerge2.default)(state, data);
+          return state;
+        });
+
+        loaders.push([loader, props, resolve]);
+      }
+
+      return resolve;
+    },
+    fetch: function fetch() {
+      return Promise.all(loaders.map(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 3),
+            resolve = _ref2[2];
+
+        return resolve;
+      })).then(function () {
+        return state;
+      }).catch(function (err) {
+        return console.error(err);
+      });
     }
   };
 
-  methods.setHash(hydrate);
   methods.setState(hydrate);
 
   return methods;
@@ -13226,7 +13245,7 @@ var invariant = __webpack_require__(16);
 var warning = __webpack_require__(14);
 
 var ReactPropTypesSecret = __webpack_require__(73);
-var checkPropTypes = __webpack_require__(259);
+var checkPropTypes = __webpack_require__(261);
 
 module.exports = function(isValidElement, throwOnDirectAccess) {
   /* global Symbol */
@@ -13757,7 +13776,7 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(261)();
+  module.exports = __webpack_require__(263)();
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
@@ -13815,7 +13834,7 @@ var ReactCurrentOwner = __webpack_require__(45);
 var ReactComponentTreeHook = __webpack_require__(75);
 var ReactElement = __webpack_require__(24);
 
-var checkReactTypeSpec = __webpack_require__(272);
+var checkReactTypeSpec = __webpack_require__(274);
 
 var canDefineProperty = __webpack_require__(46);
 var getIteratorFn = __webpack_require__(124);
@@ -14130,7 +14149,7 @@ module.exports = getIteratorFn;
 "use strict";
 
 
-module.exports = __webpack_require__(264);
+module.exports = __webpack_require__(266);
 
 
 /***/ }),
@@ -28861,27 +28880,36 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Tap = function (_React$Component) {
   _inherits(Tap, _React$Component);
 
-  function Tap() {
-    _classCallCheck(this, Tap);
-
-    return _possibleConstructorReturn(this, (Tap.__proto__ || Object.getPrototypeOf(Tap)).apply(this, arguments));
-  }
-
   _createClass(Tap, [{
     key: 'getChildContext',
     value: function getChildContext() {
-      var _props = this.props,
-          _props$hydrate = _props.hydrate,
-          hydrate = _props$hydrate === undefined ? {} : _props$hydrate,
-          children = _props.children;
-
-
       return {
         hydrate: {
-          store: hydrate.getState ? hydrate : (0, _store2.default)(hydrate),
-          root: children
+          store: this.store,
+          root: this.props.children,
+          hydrateStore: this.hydrateStore.bind(this)
         }
       };
+    }
+  }]);
+
+  function Tap(props) {
+    _classCallCheck(this, Tap);
+
+    var _this = _possibleConstructorReturn(this, (Tap.__proto__ || Object.getPrototypeOf(Tap)).call(this, props));
+
+    var _this$props$hydrate = _this.props.hydrate,
+        hydrate = _this$props$hydrate === undefined ? {} : _this$props$hydrate;
+
+
+    _this.hydrateStore(hydrate);
+    return _this;
+  }
+
+  _createClass(Tap, [{
+    key: 'hydrateStore',
+    value: function hydrateStore(hydrate) {
+      this.store = hydrate.getState ? hydrate : (0, _store2.default)(hydrate);
     }
   }, {
     key: 'render',
@@ -28899,9 +28927,10 @@ Tap.childContextTypes = {
       getState: _propTypes2.default.func.isRequired,
       setState: _propTypes2.default.func.isRequired,
       clearState: _propTypes2.default.func.isRequired,
-      addLoader: _propTypes2.default.func.isRequired,
-      getHash: _propTypes2.default.func.isRequired
-    }).isRequired
+      addLoader: _propTypes2.default.func.isRequired
+    }).isRequired,
+    root: _propTypes2.default.object.isRequired,
+    hydrateStore: _propTypes2.default.func.isRequired
   }).isRequired
 };
 exports.default = Tap;
@@ -28929,9 +28958,11 @@ var _propTypes = __webpack_require__(120);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _equalObj = __webpack_require__(259);
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _equalObj2 = _interopRequireDefault(_equalObj);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -28939,90 +28970,70 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var isServer = typeof window === 'undefined';
+
 exports.default = function (dataLoader) {
+  var mapStateToProps = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (s) {
+    return s;
+  };
   return function (Comp) {
     var _class, _temp;
 
     return _temp = _class = function (_React$Component) {
       _inherits(ComponentProvider, _React$Component);
 
+      _createClass(ComponentProvider, [{
+        key: 'load',
+        value: function load(props) {
+          var addLoader = this.context.hydrate.store.addLoader;
+
+
+          return addLoader([dataLoader, props], !(0, _equalObj2.default)(this.props, props));
+        }
+      }]);
+
       function ComponentProvider(props, context) {
         _classCallCheck(this, ComponentProvider);
 
         var _this = _possibleConstructorReturn(this, (ComponentProvider.__proto__ || Object.getPrototypeOf(ComponentProvider)).call(this, props, context));
 
-        _this.state = {
-          loading: true
-        };
+        var state = {};
 
-        _this.id = Comp.name;
-        _this.store = _this.context.hydrate.store;
+        try {
+          state = _extends({
+            loading: false
+          }, mapStateToProps(_this.context.hydrate.store.getState(), props));
+        } catch (e) {}
+
+        _this.state = _extends({
+          loading: true
+        }, state);
+
+        _this.load(props || {}).then(function (state) {
+          var mappedState = mapStateToProps(state, props);
+          isServer ? _this.cache = mappedState : _this.setState(_extends({
+            loading: false
+          }, mappedState));
+        });
         return _this;
       }
 
       _createClass(ComponentProvider, [{
         key: 'componentWillMount',
         value: function componentWillMount() {
-          var _store = this.store,
-              getState = _store.getState,
-              setState = _store.setState,
-              addLoader = _store.addLoader,
-              getHash = _store.getHash;
-
-          /**
-           * Synchronous. Check if
-           * the loader exists on the
-           * store. If not, add it.
-           */
-
-          if (!getHash()[this.id]) {
-            addLoader(_defineProperty({}, this.id, {
-              loader: dataLoader,
-              props: this.props
-            }));
-          }
-        }
-      }, {
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-          var _this2 = this;
-
-          var _store2 = this.store,
-              getState = _store2.getState,
-              setState = _store2.setState,
-              addLoader = _store2.addLoader,
-              getHash = _store2.getHash;
-
-
-          getState().then(function (state) {
-            if (state[_this2.id]) {
-              _this2.setState(_extends({
-                loading: false
-              }, state[_this2.id]));
-            } else {
-              Promise.resolve(dataLoader(_this2.props)).then(function (data) {
-                setState(_defineProperty({}, _this2.id, data));
-
-                _this2.setState(_extends({
-                  loading: false
-                }, data));
-              });
-            }
-          });
+          this.cache && this.setState(_extends({
+            loading: false
+          }, this.cache));
         }
       }, {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(props) {
-          var _this3 = this;
+          var _this2 = this;
 
-          var addLoader = this.store.addLoader;
-
-
-          addLoader(_defineProperty({}, this.id, {
-            loader: dataLoader,
-            props: props
-          })).then(function (data) {
-            return _this3.setState(data);
+          this.load(props).then(function (state) {
+            return _this2.setState(_extends({
+              loading: false
+            }, mapStateToProps(state, props)));
           });
         }
       }, {
@@ -29038,8 +29049,7 @@ exports.default = function (dataLoader) {
         store: _propTypes2.default.shape({
           getState: _propTypes2.default.func.isRequired,
           setState: _propTypes2.default.func.isRequired,
-          addLoader: _propTypes2.default.func.isRequired,
-          getHash: _propTypes2.default.func.isRequired
+          addLoader: _propTypes2.default.func.isRequired
         }).isRequired
       }).isRequired
     }, _temp;
@@ -29048,6 +29058,135 @@ exports.default = function (dataLoader) {
 
 /***/ }),
 /* 259 */
+/***/ (function(module, exports) {
+
+/**
+ * Expose equal
+ */
+
+module.exports = equal['default'] = equal
+
+/**
+ * Check if two objects are equal.
+ * @param  {Object} a object 1
+ * @param  {Object} b object 2
+ * @return {Boolean}
+ */
+
+function equal (a, b) {
+  var aKeys = Object.keys(a)
+  var bKeys = Object.keys(b)
+  var aLen = aKeys.length
+  var bLen = bKeys.length
+
+  if (aLen === bLen) {
+    for (var i = 0; i < aLen; ++i) {
+      var key = aKeys[i]
+
+      if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key) || a[key] !== b[key]) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  return false
+}
+
+
+/***/ }),
+/* 260 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var index$2 = function isMergeableObject(value) {
+	return isNonNullObject(value) && isNotSpecial(value)
+};
+
+function isNonNullObject(value) {
+	return !!value && typeof value === 'object'
+}
+
+function isNotSpecial(value) {
+	var stringValue = Object.prototype.toString.call(value);
+
+	return stringValue !== '[object RegExp]'
+		&& stringValue !== '[object Date]'
+}
+
+function emptyTarget(val) {
+    return Array.isArray(val) ? [] : {}
+}
+
+function cloneIfNecessary(value, optionsArgument) {
+    var clone = optionsArgument && optionsArgument.clone === true;
+    return (clone && index$2(value)) ? deepmerge(emptyTarget(value), value, optionsArgument) : value
+}
+
+function defaultArrayMerge(target, source, optionsArgument) {
+    var destination = target.slice();
+    source.forEach(function(e, i) {
+        if (typeof destination[i] === 'undefined') {
+            destination[i] = cloneIfNecessary(e, optionsArgument);
+        } else if (index$2(e)) {
+            destination[i] = deepmerge(target[i], e, optionsArgument);
+        } else if (target.indexOf(e) === -1) {
+            destination.push(cloneIfNecessary(e, optionsArgument));
+        }
+    });
+    return destination
+}
+
+function mergeObject(target, source, optionsArgument) {
+    var destination = {};
+    if (index$2(target)) {
+        Object.keys(target).forEach(function(key) {
+            destination[key] = cloneIfNecessary(target[key], optionsArgument);
+        });
+    }
+    Object.keys(source).forEach(function(key) {
+        if (!index$2(source[key]) || !target[key]) {
+            destination[key] = cloneIfNecessary(source[key], optionsArgument);
+        } else {
+            destination[key] = deepmerge(target[key], source[key], optionsArgument);
+        }
+    });
+    return destination
+}
+
+function deepmerge(target, source, optionsArgument) {
+    var array = Array.isArray(source);
+    var options = optionsArgument || { arrayMerge: defaultArrayMerge };
+    var arrayMerge = options.arrayMerge || defaultArrayMerge;
+
+    if (array) {
+        return Array.isArray(target) ? arrayMerge(target, source, optionsArgument) : cloneIfNecessary(source, optionsArgument)
+    } else {
+        return mergeObject(target, source, optionsArgument)
+    }
+}
+
+deepmerge.all = function deepmergeAll(array, optionsArgument) {
+    if (!Array.isArray(array) || array.length < 2) {
+        throw new Error('first argument should be an array with at least two elements')
+    }
+
+    // we are sure there are at least 2 values, so it is safe to have no initial value
+    return array.reduce(function(prev, next) {
+        return deepmerge(prev, next, optionsArgument)
+    })
+};
+
+var index = deepmerge;
+
+module.exports = index;
+
+
+/***/ }),
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29116,7 +29255,7 @@ module.exports = checkPropTypes;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 260 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29144,7 +29283,7 @@ module.exports = function(isValidElement) {
 
 
 /***/ }),
-/* 261 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29210,7 +29349,7 @@ module.exports = function() {
 
 
 /***/ }),
-/* 262 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29274,7 +29413,7 @@ var KeyEscapeUtils = {
 module.exports = KeyEscapeUtils;
 
 /***/ }),
-/* 263 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29392,7 +29531,7 @@ module.exports = PooledClass;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 264 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29410,16 +29549,16 @@ module.exports = PooledClass;
 
 var _assign = __webpack_require__(44);
 
-var ReactChildren = __webpack_require__(265);
+var ReactChildren = __webpack_require__(267);
 var ReactComponent = __webpack_require__(74);
-var ReactPureComponent = __webpack_require__(270);
-var ReactClass = __webpack_require__(266);
-var ReactDOMFactories = __webpack_require__(267);
+var ReactPureComponent = __webpack_require__(272);
+var ReactClass = __webpack_require__(268);
+var ReactDOMFactories = __webpack_require__(269);
 var ReactElement = __webpack_require__(24);
-var ReactPropTypes = __webpack_require__(268);
-var ReactVersion = __webpack_require__(271);
+var ReactPropTypes = __webpack_require__(270);
+var ReactVersion = __webpack_require__(273);
 
-var onlyChild = __webpack_require__(273);
+var onlyChild = __webpack_require__(275);
 var warning = __webpack_require__(14);
 
 var createElement = ReactElement.createElement;
@@ -29502,7 +29641,7 @@ module.exports = React;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 265 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29518,11 +29657,11 @@ module.exports = React;
 
 
 
-var PooledClass = __webpack_require__(263);
+var PooledClass = __webpack_require__(265);
 var ReactElement = __webpack_require__(24);
 
 var emptyFunction = __webpack_require__(43);
-var traverseAllChildren = __webpack_require__(274);
+var traverseAllChildren = __webpack_require__(276);
 
 var twoArgumentPooler = PooledClass.twoArgumentPooler;
 var fourArgumentPooler = PooledClass.fourArgumentPooler;
@@ -29698,7 +29837,7 @@ var ReactChildren = {
 module.exports = ReactChildren;
 
 /***/ }),
-/* 266 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30427,7 +30566,7 @@ module.exports = ReactClass;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 267 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30603,7 +30742,7 @@ module.exports = ReactDOMFactories;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 268 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30622,12 +30761,12 @@ module.exports = ReactDOMFactories;
 var _require = __webpack_require__(24),
     isValidElement = _require.isValidElement;
 
-var factory = __webpack_require__(260);
+var factory = __webpack_require__(262);
 
 module.exports = factory(isValidElement);
 
 /***/ }),
-/* 269 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30649,7 +30788,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 module.exports = ReactPropTypesSecret;
 
 /***/ }),
-/* 270 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30696,7 +30835,7 @@ ReactPureComponent.prototype.isPureReactComponent = true;
 module.exports = ReactPureComponent;
 
 /***/ }),
-/* 271 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30715,7 +30854,7 @@ module.exports = ReactPureComponent;
 module.exports = '15.5.4';
 
 /***/ }),
-/* 272 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30734,7 +30873,7 @@ module.exports = '15.5.4';
 var _prodInvariant = __webpack_require__(25);
 
 var ReactPropTypeLocationNames = __webpack_require__(123);
-var ReactPropTypesSecret = __webpack_require__(269);
+var ReactPropTypesSecret = __webpack_require__(271);
 
 var invariant = __webpack_require__(16);
 var warning = __webpack_require__(14);
@@ -30808,7 +30947,7 @@ module.exports = checkReactTypeSpec;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 273 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30852,7 +30991,7 @@ module.exports = onlyChild;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 274 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30875,7 +31014,7 @@ var REACT_ELEMENT_TYPE = __webpack_require__(121);
 
 var getIteratorFn = __webpack_require__(124);
 var invariant = __webpack_require__(16);
-var KeyEscapeUtils = __webpack_require__(262);
+var KeyEscapeUtils = __webpack_require__(264);
 var warning = __webpack_require__(14);
 
 var SEPARATOR = '.';

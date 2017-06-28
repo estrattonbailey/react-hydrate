@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import eq from '@f/equal-obj'
 
+const isServer = typeof window === 'undefined'
+
 export default (
   dataLoader,
   mapStateToProps = s => s
@@ -34,7 +36,7 @@ export default (
       try {
         state = {
           loading: false,
-          ...mapStateToProps(this.context.hydrate.store.getState())
+          ...mapStateToProps(this.context.hydrate.store.getState(), props)
         }
       } catch (e) {}
 
@@ -44,7 +46,23 @@ export default (
       }
 
       this.load(props || {}).then(state => {
-        this.cache = mapStateToProps(state)
+        const mappedState = mapStateToProps(state, props)
+
+        /**
+         * If we're on the server,
+         * set the local cache to next
+         * render pass. Otherwise,
+         * setState whenever the data
+         * comes back.
+         */
+        isServer ? (
+          this.cache = mappedState
+        ) : (
+          this.setState({
+            loading: false,
+            ...mappedState
+          })
+        )
       })
     }
 
@@ -58,7 +76,7 @@ export default (
     componentWillReceiveProps (props) {
       this.load(props).then(state => this.setState({
         loading: false,
-        ...mapStateToProps(state)
+        ...mapStateToProps(state, props)
       }))
     }
 
