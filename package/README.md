@@ -1,107 +1,129 @@
 # react-hydrate
-Asynchronous data fetching in React SSR environments.
-
-**Proof of concept:** working on a new personal site and boilerplate [over here](https://github.com/estrattonbailey/root/blob/master/server/router.js).
+Hyper-minimal, generic data fetching and SSR hydration pattern for React.
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](http://standardjs.com)
 
-## Purpose
-This libary does one thing: fetches all the data needed for a given view so that the app can render a complete page on a cold load. Then, when the app boots up (assuming javascript is enabled), `react-hydrate` can hydrate the rendered components to prevent *re-fetching* of the data.
-
-As subsequent components render – say after a route change - `react-hydrate` simply passes a loading prop so that you can configure a loader for each view.
+## Features & Goals
+1. Co-locate data dependencies with your components
+2. Fetches requested data on the server and hydrates on the client for a fast startup
+3. Wraps components so users can easily define loading states for subsequent route transitions
+4. No magic, few opinions. It's manual, but flexible.
+5. Routing agnostic. Works with `react-router` v4.
+6. Lightweight **~3.1kb**
 
 ## Usage
+### Defining components
 ```javascript
 /**
- * index.js
- * 
- * Wrap root node with Tap context
- * provider. Hydrate state from wherever
- * state was stored on window during SSR.
+ * Projects.js
  */
-import App from './App.js'
-import { Tap } from 'react-hydrate'
-
-const Root = props => (
-  <Tap initialState={window.__state || null}>
-    <App />
-  </Tap>
-)
-
-render(
-  <Root />,
-  document.getElementById('root')
-)
-
-/**
- * App.js
- *
- * On first load, this component will
- * already have it's `title` prop available
- * to it because it was hydrated on the server.
- * 
- * If this component was rendered after the
- * initial load – like on a route change –
- * it will show 'Loading...' until the loading
- * function resolves with data.
- */
-const App = ({ loading, title }) => (
-  <h1>{loading ? 'Loading...' : title}</h1>
-)
+import api from 'my-api'
+import { hydrate } from 'react-hydrate'
+import Project from './Project.js'
 
 export default hydrate(
-  props => {
-    /* hit an API, process data */
-    return { someOtherProp: 'Hello world!' }
+  (props, state) => {
+    return api.fetchProjects().then(projects => {
+      return {
+        projects: projects
+      }
+    })
   },
-  state => ({
-    title: state.someOtherProp
-  })
-)(App)
-
-/**
- * server.js
- *
- * Wrap root node with Tap context provider.
- *
- * After the initial render, the `store`
- * export from the main package contains
- * all the component's loaders. Calling
- * `store.fetch()` returns a promise that resolves
- * to the fetched data.
- * 
- * `store.state` then contains the data needed
- * to hydrate the application. Attach it to the window
- * where needed.
- */
-import { renderToString } from 'react-dom'
-import { Tap, store } from 'react-hydrate'
-import App from './App.js'
-
-app.use((req, res) => {
-  const content = renderToString(
-    <Tap>
-      <App />
-    </Tap>
+  (state, props) => {
+    return {
+      data: state.projects
+    }
+  }
+)(props => {
+  return props.loading ? (
+    <div>Loading data...</div>
+  ) : (
+    props.projects.map(project => <Project {...project} key={project.slug}>)
   )
-
-  store.fetch().then(data => {
-    res.write(`<!DOCTYPE html>
-      <html>
-        <head></head>
-        <body>
-          ${content}
-          <script>
-            window.__state = ${JSON.stringify(store.state)}
-          </script>
-          <script src="/index.js"></script>
-        </body>
-      </html>
-    `)
-    res.end()
-  })
 })
 ```
 
-MIT License
+```javascript
+/**
+ * App.js
+ */
+import React from 'react'
+import Projects from './Projects.js'
 
+export default props => (
+  <div>
+    <Projects />
+  </div>
+)
+```
+
+### Creating root app
+```javascript
+import React from 'react'
+import { render } from 'react-dom'
+import { BrowserRouter as Router } from 'react-router-dom'
+import { Tap } from 'react-hydrate'
+import App from './App'
+
+render((
+  <Router>
+    <Tap hydrate={window.__hydrate || null}>
+      <App />
+    </Tap>
+  </Router>
+), document.getElementById('root'))
+```
+
+### Server
+```javascript
+import React from 'react'
+import { renderToString } from 'react-dom/server'
+import { StaticRouter: Router } from 'react-router'
+import { Tap, createStore } from 'react-hydrate'
+import App from './App.js'
+
+app.use((req, res) => {
+  const ctx = {}
+  const store = createStore({})
+
+  const render = () => renderToString(
+    <Router location={req.url} context={ctx}>
+      <Tap hydrate={store}>
+        <App />
+      </Tap>
+    </Router>
+  )
+
+  render()
+
+  if (ctx.url) {
+    res.writeHead(302, {
+      Location: ctx.url
+    })
+    res.end()
+  } else {
+    store.fetch().then(state => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head></head>
+          <body>
+            ${render()}
+            <script>
+              window.__hydrate = ${JSON.stringify(state)}
+            </script>
+            <script src="/index.js"></script>
+          </body>
+        </html>
+      `)
+      res.end()
+      store.clearState()
+    })
+  }
+})
+```
+
+## Caveats
+Like other route-agnostic data loading libraries, `react-hydrate` needs to run a *blind render* to gather data dependencies. Then, once the data is fetched, run another render pass with the data in place. This second render is then sent down to the client. With the upcoming release of Fiber, we may be able to do this with only a single render, but for now *I think* this is as good as we can do.
+
+MIT License

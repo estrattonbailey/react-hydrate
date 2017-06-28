@@ -33,9 +33,21 @@ export default class Tap extends React.Component {
       hydrate = {}
     } = this.props
 
+    /**
+     * Create new store with hydrated
+     * store or an empty object
+     */
     this.hydrateStore(hydrate)
   }
 
+  /**
+   * This needs to allow you to pass
+   * a "hot" store (one already in memory)
+   * in order to prefetch data, hence the
+   * check for the `getState` method.
+   * Otherwise, we're just creating a
+   * fresh store here.
+   */
   hydrateStore (hydrate) {
     this.store = hydrate.getState ? hydrate : createStore(hydrate)
   }

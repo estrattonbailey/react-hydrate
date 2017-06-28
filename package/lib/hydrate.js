@@ -1,31 +1,31 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import eq from '@f/equal-obj'
+import eq from 'deep-equal'
 
 const isServer = typeof window === 'undefined'
 
-export default (
-  dataLoader,
-  mapStateToProps = s => s
-) => Comp => {
-  return class ComponentProvider extends React.Component {
+export default (dataLoader, mapStateToProps = s => s) => Comp => {
+  return class Hydrate extends React.Component {
     static contextTypes = {
       hydrate: PropTypes.shape({
         store: PropTypes.shape({
           getState: PropTypes.func.isRequired,
-          setState: PropTypes.func.isRequired,
           addLoader: PropTypes.func.isRequired
         }).isRequired
       }).isRequired
     }
 
+    /**
+     * Re-evaluate dataLoader with
+     * a given set of props. This is called
+     * in the event the initial mapStateToProps
+     * call returns a falsy value, and when
+     * props update in componentWillReceiveProps.
+     */
     load (props) {
       const { addLoader } = this.context.hydrate.store
 
-      return addLoader(
-        [ dataLoader, props ],
-        !eq(this.props, props)
-      )
+      return addLoader([ dataLoader, props ])
     }
 
     constructor (props, context) {
@@ -34,9 +34,15 @@ export default (
       let state = {}
 
       try {
-        state = {
-          loading: false,
-          ...mapStateToProps(this.context.hydrate.store.getState(), props)
+        const s = mapStateToProps(this.context.hydrate.store.getState(), props)
+
+        if (s) {
+          state = {
+            loading: false,
+            ...s
+          }
+        } else {
+          throw '' // User defined mapStateToProps returned falsy
         }
       } catch (e) {}
 
@@ -45,8 +51,14 @@ export default (
         ...state
       }
 
+      /**
+       * Even if data is hydrated after SSR,
+       * we need to push the loader into the
+       * hash so that it's in memory for
+       * future load calls
+       */
       this.load(props || {}).then(state => {
-        const mappedState = mapStateToProps(state, props)
+        const s = mapStateToProps(state, props)
 
         /**
          * If we're on the server,
@@ -56,16 +68,21 @@ export default (
          * comes back.
          */
         isServer ? (
-          this.cache = mappedState
+          this.cache = s
         ) : (
           this.setState({
             loading: false,
-            ...mappedState
+            ...s
           })
         )
       })
     }
 
+    /**
+     * Called during SSR. On the
+     * frontend, we'll just call
+     * setState ASAP.
+     */
     componentWillMount () {
       this.cache && this.setState({
         loading: false,
@@ -73,17 +90,18 @@ export default (
       })
     }
 
+    /**
+     * Reload data if props have changed
+     */
     componentWillReceiveProps (props) {
-      this.load(props).then(state => this.setState({
+      !eq(this.props, props) && this.load(props).then(state => this.setState({
         loading: false,
         ...mapStateToProps(state, props)
       }))
     }
 
     render () {
-      return (
-        <Comp {...this.props} {...this.state} />
-      )
+      return <Comp {...this.props} {...this.state} />
     }
   }
 }
