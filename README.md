@@ -36,12 +36,19 @@ export default hydrate(
   /**
    * mapStateToProps receives the
    * loaded data via `state` and any
-   * component props
+   * component props.
+   *
+   * You should return `false` here if 
+   * the data needed is not yet availabe.
+   * If a falsy value is returned, it
+   * tells the library that the loader
+   * hasn't been run yet or hasn't
+   * yet resolved.
    */
   (state, props) => {
-    return {
+    return state.projects ? {
       data: state.projects
-    }
+    } : false
   }
 )(props => {
   /**
