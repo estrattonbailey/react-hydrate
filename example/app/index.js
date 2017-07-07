@@ -17,7 +17,7 @@ if (module.hot && process && process.env.NODE_ENV !== 'production') {
  */
 render((
   <Router>
-    <Tap initialState={window.__state || null}>
+    <Tap hydrate={window.__state || null}>
       <App />
     </Tap>
   </Router>

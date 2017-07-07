@@ -15,6 +15,7 @@
 
 @import 'components/icon-buttons';
 @import 'components/internet';
+@import 'components/code';
 
 * {
   box-sizing: border-box;

@@ -48,7 +48,7 @@ export default class Tap extends React.Component {
    * Otherwise, we're just creating a
    * fresh store here.
    */
-  hydrateStore (hydrate) {
+  hydrateStore (hydrate = {}) {
     this.store = hydrate.getState ? hydrate : createStore(hydrate)
   }
 

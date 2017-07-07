@@ -1,9 +1,8 @@
 import React from 'react'
-import { Route, Link } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 
-import Header from 'Components/Header'
 import Home from 'Pages/Home'
-import About from 'Pages/About'
+import ProjectPage from 'Pages/ProjectPage'
 
 export default class App extends React.Component {
   constructor (p) {
@@ -15,9 +14,8 @@ export default class App extends React.Component {
   render () {
     return (
       <div>
-        <Header />
         <Route exact path='/' component={Home} />
-        <Route path='/about' component={About} />
+        <Route path='/oss/:slug' component={ProjectPage} />
       </div>
     )
   }

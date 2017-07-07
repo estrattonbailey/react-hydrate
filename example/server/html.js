@@ -23,7 +23,7 @@ module.exports = (content, state, css) =>
     <meta name="twitter:description" content=""/>
     <meta name="twitter:image" content=""/>
 
-    <link href="/main.css" rel="stylesheet" type="text/css"></link>
+    <link href="/public/main.css" rel="stylesheet" type="text/css"></link>
 
     <style id="grid-style">${css}</style>
 
@@ -32,9 +32,9 @@ module.exports = (content, state, css) =>
   <body>
     <div id="root">${content}</div>
     <script>
-      window.__state = ${state}
+      window.__state = ${JSON.stringify(state)}
     </script>
-    <script src="/index.js"></script>
+    <script src="/public/index.js"></script>
   </body>
 </html>
 `

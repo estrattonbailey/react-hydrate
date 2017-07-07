@@ -1,14 +1,18 @@
-@import url('https://fonts.googleapis.com/css?family=Karla:400,400i,700,700i|Roboto+Mono:700,700i');
+@import url('https://fonts.googleapis.com/css?family=Karla:400,400i,700,700i|Roboto+Mono:400,400i,700,700i');
 
 body {
 	color: #000;
 	font-family: Helvetica, Arial, sans-serif;
-	font-size: 100%;
+	font-size: 90%;
   line-height: 1.7;
   font-weight: 400;
   -webkit-font-smoothing: antialiased; 
+
+  @media (--l) {
+    font-size: 100%;
+  }
 }
-body, .roboto {
+body, .roboto, pre, code {
   font-family: 'Roboto Mono', monospace;
 }
 p, .karla {
@@ -16,6 +20,9 @@ p, .karla {
 }
 h1, h2, h3, h4, h5, h6 {
   margin: 1em 0 .6em;
+}
+h1, h2, h3, h4, h5, h6, p {
+  max-width: 50em;
 }
 .scale1,
 h1, .h1 {
@@ -63,10 +70,10 @@ h6, .h6 {
 p, .p { 
   font-size: 1rem;
 }
-p, .p { 
+p, .p {
   line-height: 1.7;
 }
-p { 
+p {
   margin: 1.5em 0
 }
 a {
@@ -113,3 +120,12 @@ strong {
   text-decoration: none;
 }
 
+pre, code {
+  font-size: 0.9em;
+}
+pre {
+  background: var(--black);
+  padding: 1.5em;
+  overflow: auto;
+  color: #76d9e6;
+}

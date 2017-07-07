@@ -1,26 +1,29 @@
 const webpack = require('webpack')
 const path = require('path')
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 const p = process.env.NODE_ENV === 'production'
 
 module.exports = {
-  devtool: 'cheap-module-source-map',
+  target: 'web',
+  devtool: 'source-map',
   entry: path.join(__dirname, 'app/index.js'),
   output: {
-    path: path.join(__dirname, 'public'),
+    path: path.join(__dirname, 'dist/public'),
     filename: 'index.js',
     publicPath: '/'
   },
+  externals: '',
   module: {
     rules: [
-      // {
-      //   enforce: 'pre',
-      //   test: /\.js?$/,
-      //   loader: 'standard-loader',
-      //   exclude: /node_modules/,
-      //   options: {
-      //     parser: 'babel-eslint'
-      //   }
-      // },
+      {
+        enforce: 'pre',
+        test: /\.js?$/,
+        loader: 'standard-loader',
+        exclude: /node_modules/,
+        options: {
+          parser: 'babel-eslint'
+        }
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -38,12 +41,15 @@ module.exports = {
       Root: path.join(__dirname, 'app/')
     }
   },
-  plugins: p ? [] : [
+  plugins: p ? [
+    new LodashModuleReplacementPlugin,
+    new webpack.optimize.OccurrenceOrderPlugin()
+  ] : [
     new webpack.HotModuleReplacementPlugin()
   ],
   devServer: {
     hot: true,
-    contentBase: path.join(__dirname, 'public'),
+    contentBase: path.join(__dirname, 'dist/public'),
     publicPath: '/',
     compress: true
   }

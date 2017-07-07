@@ -1,4 +1,4 @@
-require('babel-core/register')
+import 'source-map-support/register'
 
 /**
  * Pull in env vars
@@ -18,7 +18,7 @@ const PRODUCTION = NODE_ENV === 'production'
 const express = require('express')
 const compression = require('compression')
 const cors = require('cors')
-const parser = require('body-parser')
+// const parser = require('body-parser')
 const path = require('path')
 
 const router = require('./router.js')
@@ -29,10 +29,11 @@ const router = require('./router.js')
 const app = express()
 const port = PORT || 8888
 
+const staticPath = PRODUCTION ? path.join(__dirname, '../public') : path.join(__dirname, '../dist/public')
+
 app.use('*', cors())
-app.use(express.static(path.join(__dirname, '../public'), {
-  maxage: PRODUCTION ? 86400000 : 0
-}))
+app.use(compression())
+app.use('/public', express.static(staticPath, { maxage: PRODUCTION ? 86400000 : 0 }))
 
 app.use(router)
 

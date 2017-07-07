@@ -6,35 +6,34 @@ ol, ul {
 /* To achieve list styling, */
 /* add the .list class */
 /* i.e ol.list, ul.list */
+.markdown ul,
+.markdown ol,
 .list ul,
 .list ol {
   margin: 0;
-  padding-left: 2em;
+  padding-left: 1em;
 }
+.markdown ol,
 .list ol {
   list-style: lower-alpha inside;
+  counter-reset: num;
 }
+.markdown li,
 .list li {
   position: relative;
   margin: .33em 0;
   padding-left: 1.5em;
 }
-
-ol.list {
-  counter-reset: num;
-}
-ol.list li::before {
+.markdown ol li::before {
   content: counter(num) '.';
   counter-increment: num;
   display: block;
   position: absolute;
   left: 0; top: 0;
 }
-
-ul.list li::before {
+.markdown ul li::before {
   content: '•';
   display: block;
   position: absolute;
   left: 0; top: 0;
 }
-
