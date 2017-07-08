@@ -42,7 +42,7 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
             ...s
           }
         } else {
-          throw '' // User defined mapStateToProps returned falsy
+          throw '' // user defined mapStateToProps returned falsy
         }
       } catch (e) {}
 

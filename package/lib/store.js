@@ -1,4 +1,4 @@
-import merge from 'deepmerge'
+import merge from 'lodash/merge'
 import eq from 'deep-equal'
 
 export default hydrate => {
