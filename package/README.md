@@ -1,5 +1,5 @@
 # react-hydrate
-Hyper-minimal, generic data fetching and SSR hydration pattern for React.
+Generic data fetching and SSR hydration pattern for React.
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](http://standardjs.com)
 
@@ -8,7 +8,7 @@ Hyper-minimal, generic data fetching and SSR hydration pattern for React.
 2. Fetches requested data on the server and hydrates on the client for a fast startup
 3. Wraps components so users can easily define loading states for subsequent route transitions
 4. No magic, few opinions. It's manual, but flexible.
-5. Routing agnostic. Works with `react-router` v4.
+5. Routing agnostic. **Works with `react-router` v4.**
 6. Lightweight **~3.1kb**
 
 ## Usage
@@ -36,12 +36,19 @@ export default hydrate(
   /**
    * mapStateToProps receives the
    * loaded data via `state` and any
-   * component props
+   * component props.
+   *
+   * You should return `false` here if 
+   * the data needed is not yet availabe.
+   * If a falsy value is returned, it
+   * tells the library that the loader
+   * hasn't been run yet or hasn't
+   * yet resolved.
    */
   (state, props) => {
-    return {
+    return state.projects ? {
       data: state.projects
-    }
+    } : false
   }
 )(props => {
   /**
