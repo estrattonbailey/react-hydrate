@@ -1,6 +1,6 @@
 {
   "name": "react-hydrate",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "",
   "main": "dist/index.js",
   "license": "MIT",
@@ -8,10 +8,10 @@
   "author": "estrattonbailey",
   "scripts": {
     "size": "babili dist/ | gzip-size --raw",
-    "lint": "standard 'index.js' && bundlesize",
+    "lint": "standard 'index.js'",
     "prebuild": "npm run lint",
     "prepublish": "npm run build",
-    "build": "npm run build:index && npm run build:lib",
+    "build": "npm run build:index && npm run build:lib && npm run size",
     "watch": "parallelshell 'npm run watch:index' 'npm run watch:lib'",
     "build:index": "babel index.js -d dist/",
     "watch:index": "babel -w index.js -d dist/",

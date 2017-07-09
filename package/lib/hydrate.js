@@ -90,6 +90,8 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
             ...s
           })
         )
+      }).catch(err => {
+        throw new Error(`hydrate(${Comp.name || Comp.displayName})`, err)
       })
     }
 
