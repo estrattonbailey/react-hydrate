@@ -7,7 +7,8 @@
   "repository": "https://github.com/estrattonbailey/react-hydrate",
   "author": "estrattonbailey",
   "scripts": {
-    "lint": "standard 'index.js'",
+    "size": "babili dist/ | gzip-size --raw",
+    "lint": "standard 'index.js' && bundlesize",
     "prebuild": "npm run lint",
     "prepublish": "npm run build",
     "build": "npm run build:index && npm run build:lib",
@@ -29,6 +30,8 @@
     "babel-preset-babili": "0.0.10",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.23.0",
+    "bundlesize": "^0.6.1",
+    "gzip-size-cli": "^2.0.0",
     "parallelshell": "^2.0.0",
     "standard": "^9.0.2"
   },
@@ -38,7 +41,6 @@
   },
   "dependencies": {
     "deep-equal": "^1.0.1",
-    "deepmerge": "^1.4.4",
     "prop-types": "^15.5.10"
   }
 }

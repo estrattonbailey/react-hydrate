@@ -1,14 +1,10 @@
-import merge from 'lodash/merge'
 import eq from 'deep-equal'
 
-export default hydrate => {
-  let state = {}
+export default (hydrate = {}) => {
+  let state = hydrate
   let loaders = []
 
   const methods = {
-    setState (obj) {
-      state = { ...state, ...obj }
-    },
     getState () {
       return state
     },
@@ -51,10 +47,15 @@ export default hydrate => {
       if (exists) {
         [ loader, props, resolve ] = exists
       } else {
-        resolve = Promise.resolve(loader(props, state)).then(data => {
-          state = merge(state, data)
-          return state
-        })
+        resolve = Promise.resolve(loader(props, state))
+          .then(data => {
+            state = {
+              ...state,
+              ...data
+            }
+            return state
+          })
+          .catch(err => console.error('addLoader resolve returned an error', err))
 
         loaders.push([ loader, props, resolve ])
       }
@@ -72,8 +73,6 @@ export default hydrate => {
       ).then(() => state).catch(err => console.error(err))
     }
   }
-
-  methods.setState(hydrate)
 
   return methods
 }

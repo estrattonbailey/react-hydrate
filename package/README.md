@@ -9,7 +9,7 @@ Generic data fetching and SSR hydration pattern for React.
 3. Wraps components so users can easily define loading states for subsequent route transitions
 4. No magic, few opinions. It's manual, but flexible.
 5. Routing agnostic. **Works with `react-router` v4.**
-6. Lightweight **~3.1kb**
+6. Lightweight **~1.95kb**
 
 ## Usage
 ### Defining components

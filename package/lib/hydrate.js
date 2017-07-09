@@ -51,6 +51,21 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
         ...state
       }
 
+
+      /**
+       * Called during SSR. On the
+       * frontend, we'll just call
+       * setState ASAP.
+       */
+      if (isServer) {
+        this.componentWillMount = () => {
+          this.cache && this.setState({
+            loading: false,
+            ...this.cache
+          })
+        }
+      }
+
       /**
        * Even if data is hydrated after SSR,
        * we need to push the loader into the
@@ -75,18 +90,6 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
             ...s
           })
         )
-      })
-    }
-
-    /**
-     * Called during SSR. On the
-     * frontend, we'll just call
-     * setState ASAP.
-     */
-    componentWillMount () {
-      this.cache && this.setState({
-        loading: false,
-        ...this.cache
       })
     }
 

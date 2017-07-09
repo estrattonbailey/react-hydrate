@@ -7,7 +7,6 @@ export default class Tap extends React.Component {
     hydrate: PropTypes.shape({
       store: PropTypes.shape({
         getState: PropTypes.func.isRequired,
-        setState: PropTypes.func.isRequired,
         clearState: PropTypes.func.isRequired,
         addLoader: PropTypes.func.isRequired
       }).isRequired,
