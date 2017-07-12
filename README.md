@@ -5,11 +5,13 @@ Generic data fetching and SSR hydration pattern for React.
 
 ## Features & Goals
 1. Co-locate data dependencies with your components
-2. Supports inifinitely nested loaders
+2. Supports infinitely nested loaders
 3. Fetches requested data on the server and hydrates on the client for a fast startup
 4. Wraps components so users can easily define loading states for components
 5. Routing agnostic. **Works with `react-router` v4.**
 6. Lightweight **~1.9kb**
+
+Related: [react-hydrate-link](https://github.com/estrattonbailey/react-hydrate-link) - prefetch data for your next route using react-router v4.
 
 ## Usage
 ### Defining components
