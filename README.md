@@ -101,7 +101,7 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter: Router } from 'react-router'
 import { Tap, createStore } from 'react-hydrate'
-import { asyncRender } from 'react-hydrate/server'
+import { asyncRender } from 'react-hydrate/dist/server'
 import App from './App.js'
 
 app.use((req, res) => {

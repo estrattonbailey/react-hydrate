@@ -4,11 +4,13 @@ import Header from 'Components/Header'
 import Section from 'Components/Section'
 import Internets from 'Components/Internets'
 import Projects from 'Components/Projects'
+import NestedAsync from 'Components/NestedAsync'
 
 export default props => (
   <Outer>
     <Container>
       <Header />
+      <NestedAsync />
       <Section title='Internets'>
         <Internets />
       </Section>

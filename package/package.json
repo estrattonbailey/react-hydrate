@@ -1,13 +1,13 @@
 {
   "name": "react-hydrate",
-  "version": "0.7.0",
+  "version": "0.7.5",
   "description": "",
   "main": "dist/index.js",
   "license": "MIT",
   "repository": "https://github.com/estrattonbailey/react-hydrate",
   "author": "estrattonbailey",
   "scripts": {
-    "size": "babili dist/ --ignore dist/server/index.js | gzip-size --raw",
+    "size": "babili dist/ --ignore dist/server.js | gzip-size --raw",
     "lint": "standard 'index.js' 'lib/*.js' 'server/*.js'",
     "prebuild": "npm run lint",
     "prepublish": "npm run build",
@@ -17,8 +17,8 @@
     "watch:index": "babel -w index.js -d dist/",
     "watch:lib": "babel -w lib/*.js -d dist",
     "build:lib": "babel lib -d dist/lib",
-    "watch:server": "babel -w server/*.js -d dist",
-    "build:server": "babel server -d dist/server",
+    "watch:server": "babel -w server.js -d dist",
+    "build:server": "babel server.js -d dist/",
     "copy": "rm README.md ; cp ../README.md ./"
   },
   "keywords": [
