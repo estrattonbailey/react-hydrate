@@ -7,24 +7,30 @@
   "repository": "https://github.com/estrattonbailey/react-hydrate",
   "author": "estrattonbailey",
   "scripts": {
-    "size": "babili dist/ | gzip-size --raw",
-    "lint": "standard 'index.js'",
+    "size": "babili dist/ --ignore dist/server/index.js | gzip-size --raw",
+    "lint": "standard 'index.js' 'lib/*.js' 'server/*.js'",
     "prebuild": "npm run lint",
     "prepublish": "npm run build",
-    "build": "npm run build:index && npm run build:lib && npm run size",
-    "watch": "parallelshell 'npm run watch:index' 'npm run watch:lib'",
+    "build": "npm run build:index && npm run build:lib && npm run build:server && npm run size",
+    "watch": "parallelshell 'npm run watch:index' 'npm run watch:lib' 'npm run watch:server'",
     "build:index": "babel index.js -d dist/",
     "watch:index": "babel -w index.js -d dist/",
     "watch:lib": "babel -w lib/*.js -d dist",
     "build:lib": "babel lib -d dist/lib",
+    "watch:server": "babel -w server/*.js -d dist",
+    "build:server": "babel server -d dist/server",
     "copy": "rm README.md ; cp ../README.md ./"
   },
   "keywords": [
     "react"
   ],
+  "standard": {
+    "parser": "babel-eslint"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.0",
     "babel-core": "^6.21.0",
+    "babel-eslint": "^7.2.3",
     "babel-plugin-transform-class-properties": "^6.23.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-babili": "0.0.10",
@@ -41,6 +47,7 @@
   },
   "dependencies": {
     "deep-equal": "^1.0.1",
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.5.10",
+    "react-tree-walker": "^2.1.2"
   }
 }

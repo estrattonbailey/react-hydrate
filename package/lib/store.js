@@ -12,7 +12,6 @@ export default (hydrate = {}) => {
       state = {}
       loaders = []
     },
-
     /**
      * Add a loader and props to
      * the loader hash.
@@ -56,18 +55,6 @@ export default (hydrate = {}) => {
       }
 
       return resolve
-    },
-
-    /**
-     * Extract each resolver function
-     * and wait for it to return
-     */
-    fetch () {
-      return Promise.all(
-        loaders.map(([ ,, resolve ]) => resolve)
-      ).then(() => state).catch(err => {
-        throw new Error(`fetch()`, err)
-      })
     }
   }
 

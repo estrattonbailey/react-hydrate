@@ -42,7 +42,8 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
             ...s
           }
         } else {
-          throw '' // user defined mapStateToProps returned falsy
+          // user defined mapStateToProps returned falsy
+          throw '' // eslint-disable-line no-throw-literal
         }
       } catch (e) {}
 
@@ -50,7 +51,6 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
         loading: true,
         ...state
       }
-
 
       /**
        * Called during SSR. On the
@@ -72,7 +72,7 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
        * hash so that it's in memory for
        * future load calls
        */
-      this.load(props || {}).then(state => {
+      this.resolver = this.load(props || {}).then(state => {
         const s = mapStateToProps(state, props)
 
         /**
@@ -90,6 +90,8 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
             ...s
           })
         )
+
+        return true
       }).catch(err => {
         throw new Error(`hydrate(${Comp.name || Comp.displayName})`, err)
       })

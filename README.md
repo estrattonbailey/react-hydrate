@@ -5,11 +5,11 @@ Generic data fetching and SSR hydration pattern for React.
 
 ## Features & Goals
 1. Co-locate data dependencies with your components
-2. Fetches requested data on the server and hydrates on the client for a fast startup
-3. Wraps components so users can easily define loading states for subsequent route transitions
-4. No magic, few opinions. It's manual, but flexible.
+2. Supports inifinitely nested loaders
+3. Fetches requested data on the server and hydrates on the client for a fast startup
+4. Wraps components so users can easily define loading states for components
 5. Routing agnostic. **Works with `react-router` v4.**
-6. Lightweight **~3.1kb**
+6. Lightweight **~1.9kb**
 
 ## Usage
 ### Defining components
@@ -101,13 +101,14 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter: Router } from 'react-router'
 import { Tap, createStore } from 'react-hydrate'
+import { asyncRender } from 'react-hydrate/server'
 import App from './App.js'
 
 app.use((req, res) => {
   const ctx = {}
   const store = createStore({})
 
-  const render = () => renderToString(
+  const Root = (
     <Router location={req.url} context={ctx}>
       <Tap hydrate={store}>
         <App />
@@ -115,21 +116,22 @@ app.use((req, res) => {
     </Router>
   )
 
-  render()
+  asyncRender(Root).then(() => {
+    const state = store.getState()
+    const content = renderToString(Root)
 
-  if (ctx.url) {
-    res.writeHead(302, {
-      Location: ctx.url
-    })
-    res.end()
-  } else {
-    store.fetch().then(state => {
+    if (ctx.url) {
+      res.writeHead(302, {
+        Location: ctx.url
+      })
+      res.end()
+    } else {
       res.send(`
         <!DOCTYPE html>
         <html>
           <head></head>
           <body>
-            ${render()}
+            ${content}
             <script>
               window.__hydrate = ${JSON.stringify(state)}
             </script>
@@ -139,8 +141,8 @@ app.use((req, res) => {
       `)
       res.end()
       store.clearState()
-    })
-  }
+    }
+  })
 })
 ```
 
