@@ -146,7 +146,7 @@ app.use((req, res) => {
 })
 ```
 
-## Caveats
-Like other route-agnostic data loading libraries, `react-hydrate` needs to run a *blind render* to gather data dependencies. Then, once the data is fetched, run another render pass with the data in place. This second render is then sent down to the client. With the upcoming release of Fiber, we may be able to do this with only a single render, but for now *I think* this is as good as we can do.
+## Dependencies
+- [react-tree-walker:](https://github.com/ctrlplusb/react-tree-walker) Walk a React element tree. by [@ctrlplusb](https://github.com/ctrlplusb)
 
 MIT License
