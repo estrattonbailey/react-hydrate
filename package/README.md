@@ -5,11 +5,13 @@ Generic data fetching and SSR hydration pattern for React.
 
 ## Features & Goals
 1. Co-locate data dependencies with your components
-2. Supports inifinitely nested loaders
+2. Supports infinitely nested loaders
 3. Fetches requested data on the server and hydrates on the client for a fast startup
 4. Wraps components so users can easily define loading states for components
 5. Routing agnostic. **Works with `react-router` v4.**
 6. Lightweight **~1.9kb**
+
+Related: [react-hydrate-link](https://github.com/estrattonbailey/react-hydrate-link) - prefetch data for your next route using react-router v4.
 
 ## Usage
 ### Defining components
@@ -47,19 +49,19 @@ export default hydrate(
    */
   (state, props) => {
     return state.projects ? {
-      data: state.projects
+      projects: state.projects
     } : false
   }
-)(props => {
+)(({ loading, data, ...inheritedProps }) => {
   /**
    * Component is always passed a loading
    * prop that represents the status of their
    * dataLoader function
    */
-  return props.loading ? (
+  return loading ? (
     <div>Loading data...</div>
   ) : (
-    props.data.map(project => <Project {...project} key={project.slug}>)
+    data.projects.map(project => <Project {...project} key={project.slug}>)
   )
 })
 ```
@@ -146,7 +148,7 @@ app.use((req, res) => {
 })
 ```
 
-## Caveats
-Like other route-agnostic data loading libraries, `react-hydrate` needs to run a *blind render* to gather data dependencies. Then, once the data is fetched, run another render pass with the data in place. This second render is then sent down to the client. With the upcoming release of Fiber, we may be able to do this with only a single render, but for now *I think* this is as good as we can do.
+## Dependencies
+- [react-tree-walker:](https://github.com/ctrlplusb/react-tree-walker) Walk a React element tree. by [@ctrlplusb](https://github.com/ctrlplusb)
 
 MIT License

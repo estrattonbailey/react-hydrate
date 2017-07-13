@@ -41,7 +41,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
         if (s) {
           state = {
             loading: false,
-            ...s
+            data: s
           }
         } else {
           // user defined mapStateToProps returned falsy
@@ -51,6 +51,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
 
       this.state = {
         loading: true,
+        data: null,
         ...state
       }
 
@@ -68,7 +69,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
         this.componentWillMount = () => {
           this.cache && this.setState({
             loading: false,
-            ...this.cache
+            data: this.cache
           })
         }
       }
@@ -94,7 +95,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
         ) : (
           this.setState({
             loading: false,
-            ...s
+            data: s
           })
         )
 
@@ -110,7 +111,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
     componentWillReceiveProps (props) {
       !eq(this.props, props) && this.load(props).then(state => this.setState({
         loading: false,
-        ...mapStateToProps(state, props)
+        data: mapStateToProps(state, props)
       }))
     }
 

@@ -49,19 +49,19 @@ export default hydrate(
    */
   (state, props) => {
     return state.projects ? {
-      data: state.projects
+      projects: state.projects
     } : false
   }
-)(props => {
+)(({ loading, data, ...inheritedProps }) => {
   /**
    * Component is always passed a loading
    * prop that represents the status of their
    * dataLoader function
    */
-  return props.loading ? (
+  return loading ? (
     <div>Loading data...</div>
   ) : (
-    props.data.map(project => <Project {...project} key={project.slug}>)
+    data.projects.map(project => <Project {...project} key={project.slug}>)
   )
 })
 ```
