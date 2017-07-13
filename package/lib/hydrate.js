@@ -4,7 +4,9 @@ import eq from 'deep-equal'
 
 const isServer = typeof window === 'undefined'
 
-export default (dataLoader, mapStateToProps = s => s) => Comp => {
+export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
+  const ssr = options.ssr !== undefined ? options.ssr : true
+
   return class Hydrate extends React.Component {
     static contextTypes = {
       hydrate: PropTypes.shape({
@@ -51,6 +53,11 @@ export default (dataLoader, mapStateToProps = s => s) => Comp => {
         loading: true,
         ...state
       }
+
+      /**
+       * Skip loader for SSR
+       */
+      if (isServer && !ssr) return
 
       /**
        * Called during SSR. On the
