@@ -4,8 +4,11 @@ import eq from 'deep-equal'
 
 const isServer = typeof window === 'undefined'
 
+const onError = (err, name) => console.error(`Resolver error @ hydrate(${name})`, ' – ', err, ' – ')
+
 export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
   const ssr = options.ssr !== undefined ? options.ssr : true
+  const displayName = Comp.name || Comp.displayName
 
   return class Hydrate extends React.Component {
     static contextTypes = {
@@ -47,7 +50,9 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
           // user defined mapStateToProps returned falsy
           throw '' // eslint-disable-line no-throw-literal
         }
-      } catch (e) {}
+      } catch (err) {
+        onError(err, displayName)
+      }
 
       this.state = {
         loading: true,
@@ -81,7 +86,13 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
        * future load calls
        */
       this.resolver = this.load(props || {}).then(state => {
-        const s = mapStateToProps(state, props)
+        let s
+
+        try {
+          s = mapStateToProps(state, props)
+        } catch (err) {
+          onError(err, displayName)
+        }
 
         /**
          * If we're on the server,
@@ -101,7 +112,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
 
         return true
       }).catch(err => {
-        throw new Error(`hydrate(${Comp.name || Comp.displayName})`, err)
+        onError(err, displayName)
       })
     }
 
