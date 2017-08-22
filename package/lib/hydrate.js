@@ -4,11 +4,15 @@ import eq from 'deep-equal'
 
 const isServer = typeof window === 'undefined'
 
-const onError = (err, name) => console.error(`Resolver error @ hydrate(${name})`, ' – ', err, ' – ')
-
 export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
-  const ssr = options.ssr !== undefined ? options.ssr : true
-  const displayName = Comp.name || Comp.displayName
+  const opts = {
+    ssr: true,
+    displayName: Comp.name || Comp.displayName,
+    onError: (err, details, displayName) => {
+      console.error(`react-hydrate – ${details} @ hydrate(${displayName})`, err) // eslint-disable-line no-irregular-whitespace
+    },
+    ...options
+  }
 
   return class Hydrate extends React.Component {
     static contextTypes = {
@@ -46,12 +50,9 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
             loading: false,
             data: s
           }
-        } else {
-          // user defined mapStateToProps returned falsy
-          throw '' // eslint-disable-line no-throw-literal
         }
       } catch (err) {
-        onError(err, displayName)
+        opts.onError(err, 'mapStateToProps threw an error', opts.displayName)
       }
 
       this.state = {
@@ -63,7 +64,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
       /**
        * Skip loader for SSR
        */
-      if (isServer && !ssr) return
+      if (isServer && !opts.ssr) return
 
       /**
        * Called during SSR. On the
@@ -91,7 +92,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
         try {
           s = mapStateToProps(state, props)
         } catch (err) {
-          onError(err, displayName)
+          opts.onError(err, `mapStateToProps threw an error`, opts.displayName)
         }
 
         /**
@@ -112,7 +113,7 @@ export default (dataLoader, mapStateToProps = s => s, options = {}) => Comp => {
 
         return true
       }).catch(err => {
-        onError(err, displayName)
+        opts.onError(err, `dataLoader function threw an error`, opts.displayName)
       })
     }
 
